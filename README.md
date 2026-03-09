@@ -142,9 +142,9 @@ report.compare_with_hybrid(ebes, covariates)
 
 Static docs pages live in `docs/` and are suitable for GitHub Pages:
 
-- `docs/index.html`
-- `docs/tutorial.html`
-- `docs/benchmarks.html`
+- [Overview](docs/index.html)
+- [Tutorial](docs/tutorial.html)
+- [Benchmarks](docs/benchmarks.html)
 
 ## Methodological References
 
