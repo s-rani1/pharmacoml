@@ -1,5 +1,10 @@
 # pharmacoml
 
+[![PyPI version](https://img.shields.io/pypi/v/pharmacoml)](https://pypi.org/project/pharmacoml/)
+[![Python versions](https://img.shields.io/pypi/pyversions/pharmacoml)](https://pypi.org/project/pharmacoml/)
+[![License](https://img.shields.io/github/license/s-rani1/pharmacoml)](LICENSE)
+[![CI](https://github.com/s-rani1/pharmacoml/actions/workflows/ci.yml/badge.svg)](https://github.com/s-rani1/pharmacoml/actions/workflows/ci.yml)
+
 **pharmacoml is a benchmark-backed hybrid AI/ML covariate screening toolkit for population PK/PD, combining explainable ML discovery, penalized confirmation, and SCM-style bridging in an estimation-tool-agnostic Python workflow.**
 
 ## What It Is
@@ -24,7 +29,7 @@ search space before SCM, backward elimination, or final model fitting.
 
 - Uses a hybrid AI/ML screening workflow that combines explainable ML discovery, penalized confirmation, and SCM-style bridging instead of relying on a single method.
 - Works with EBEs or individual parameters from any solver, including `NONMEM`, `nlmixr2`, `Monolix`, and `Pumas`, so screening is not tied to a single estimation engine.
-- Supports many screening backends, including explainable boosting, `AALASSO`, `STG`, and an SCM-style bridge, rather than relying on a single screening model.
+- Supports many screening backends, including explainable boosting, `AALASSO`, `Stochastic Gates (STG)`, and an SCM-style bridge, rather than relying on a single screening model.
 - Includes pharmacometric screening features such as shrinkage-aware logic, biology-aware proxy preservation, and optional interaction screening.
 - Ships with a public benchmark suite, pinned baselines, and generated benchmark reports so workflow changes can be evaluated against fixed reference cases.
 
