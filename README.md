@@ -91,6 +91,22 @@ Example `confirmed_covariates()` output:
 - `interaction_covariates()`: screened interactions when enabled
 - `to_nonmem_candidates()`: export-ready candidate block for downstream workflows
 
+## How to Read the Outputs
+
+- `confirmed_covariates()`: start here for the most compact daily-use answer. These are the covariates that survive the package's confirmation layer and are the clearest candidates to carry forward.
+- `candidate_covariates()`: use this as the practical shortlist for formal PMx confirmation. It is intentionally broader than `confirmed_covariates()` and is often the right input to SCM or backward elimination.
+- `core_covariates()`: the strongest ML-supported signals before confirmation. This is useful when you want to inspect what the AI/ML layer found most strongly, even if not every signal is retained in the final confirmed set.
+- `proxy_groups()`: review this whenever correlated covariates are plausible. It shows which variables are acting as correlated alternatives so you can make a pharmacometrically sensible choice downstream.
+- `interaction_covariates()`: only relevant when interaction screening is enabled. These are pairwise interaction terms that survived the screening workflow.
+- `to_nonmem_candidates()`: use this when you want a direct candidate block to carry into a downstream modeling workflow.
+
+For most users, the practical reading order is:
+
+1. `confirmed_covariates()`
+2. `candidate_covariates()`
+3. `proxy_groups()`
+4. `to_nonmem_candidates()`
+
 ## Benchmarks
 
 `pharmacoml` includes a fixed public benchmark suite for release calibration:

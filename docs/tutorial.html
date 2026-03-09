@@ -284,6 +284,33 @@ report = HybridScreener(include_scm=True).fit(
           </tr>
         </tbody>
       </table>
+      <div class="two-col" style="margin-top: 1.25rem;">
+        <div>
+          <p><strong>Which result should I look at first?</strong></p>
+          <p>
+            Start with <code>report.confirmed_covariates()</code> for the most
+            compact daily-use answer. This is the easiest view to hand to a
+            pharmacometrician who wants the short list with the strongest
+            confirmation behind it.
+          </p>
+          <p>
+            Then review <code>report.candidate_covariates()</code>. This is the
+            broader shortlist and is often the most useful table to carry into
+            SCM, backward elimination, or manual covariate review.
+          </p>
+        </div>
+        <div>
+          <p><strong>When do the other outputs matter?</strong></p>
+          <p>
+            Use <code>report.core_covariates()</code> when you want to see the
+            strongest AI/ML-supported signals before confirmation. Use
+            <code>report.proxy_groups()</code> when correlated variables are
+            plausible and you need to understand which covariates are acting as
+            substitutes. Use <code>report.interaction_covariates()</code> only
+            when interaction screening has been enabled.
+          </p>
+        </div>
+      </div>
       <p class="footer-note">
         <strong>Important:</strong> <code>pharmacoml</code> is a covariate
         screening and preselection tool. It helps prioritize likely covariates
