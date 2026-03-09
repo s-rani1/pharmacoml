@@ -140,11 +140,11 @@ report.compare_with_hybrid(ebes, covariates)
 
 ## Documentation
 
-Static docs pages live in `docs/` and are suitable for GitHub Pages:
+Rendered docs are available via GitHub Pages:
 
-- [Overview](docs/index.html)
-- [Tutorial](docs/tutorial.html)
-- [Benchmarks](docs/benchmarks.html)
+- [Overview](https://s-rani1.github.io/pharmacoml/)
+- [Tutorial](https://s-rani1.github.io/pharmacoml/tutorial.html)
+- [Benchmarks](https://s-rani1.github.io/pharmacoml/benchmarks.html)
 
 ## Methodological References
 
