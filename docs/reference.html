@@ -105,48 +105,79 @@ report = HybridScreener(
         <thead>
           <tr>
             <th>Option</th>
+            <th>Default</th>
             <th>Purpose</th>
+            <th>When to change it</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td><code>include_scm</code></td>
+            <td><code>True</code></td>
             <td>Enable the SCM-style confirmation layer</td>
+            <td>Turn this off only if you want a pure screening pass without the confirmation step.</td>
           </tr>
           <tr>
             <td><code>rfe_enabled</code></td>
+            <td><code>True</code></td>
             <td>Use the benchmark-backed recursive feature elimination path</td>
+            <td>Keep this on for most users. Disable it only if you want a faster, less-pruned first-pass screen.</td>
           </tr>
           <tr>
             <td><code>shrinkage_awareness</code></td>
+            <td><code>True</code></td>
             <td>Apply shrinkage-aware calibration when shrinkage information or low-information proxy signals are available</td>
+            <td>Leave this on for real PMx work. Turn it off only for method comparison or if you explicitly want unadjusted screening behavior.</td>
           </tr>
           <tr>
             <td><code>parameter_shrinkage</code></td>
+            <td><code>None</code></td>
             <td>Pass known per-parameter shrinkage values from your base model</td>
+            <td>Provide this whenever you have trusted shrinkage values from a base NONMEM, nlmixr2, or similar run. It improves credibility for weak-ETA parameters.</td>
           </tr>
           <tr>
             <td><code>include_interactions</code></td>
+            <td><code>False</code></td>
             <td>Generate and screen pairwise interaction terms after the main-effect RFE path</td>
+            <td>Turn this on when you suspect meaningful interaction effects or want to test non-additive relationships after the main-effect shortlist is stable.</td>
           </tr>
           <tr>
             <td><code>interaction_top_n</code></td>
+            <td><code>5</code></td>
             <td>Limit interaction generation to the strongest retained main effects</td>
+            <td>Reduce this for smaller datasets or when interactions become noisy; increase it only if you have enough subjects and a strong reason to search more pairs.</td>
           </tr>
           <tr>
             <td><code>preserve_proxy_pairs</code></td>
+            <td><code>None</code></td>
             <td>Keep biologically distinct but highly correlated covariates such as <code>AGE</code> and <code>PMA</code></td>
+            <td>Use this when you already know specific correlated covariates should both remain visible in the shortlist for domain reasons.</td>
+          </tr>
+          <tr>
+            <td><code>preserve_biological_distinctness</code></td>
+            <td><code>False</code></td>
+            <td>Auto-preserve near-deterministic but biologically distinct covariate pairs</td>
+            <td>Enable this when you want the workflow to be more permissive with pairs like <code>AGE</code>/<code>PMA</code> without enumerating them manually.</td>
           </tr>
           <tr>
             <td><code>include_symbolic</code></td>
+            <td><code>False</code></td>
             <td>Enable symbolic structure search</td>
+            <td>Turn this on when you want interpretable functional-form suggestions beyond the standard screening outputs.</td>
           </tr>
           <tr>
             <td><code>symbolic_backend</code></td>
+            <td><code>"basis"</code></td>
             <td>Select <code>basis</code>, <code>gplearn</code>, or <code>pysr</code> when symbolic screening is enabled</td>
+            <td>Use <code>basis</code> for lightweight default behavior; use <code>gplearn</code> or <code>pysr</code> only when you explicitly want experimental symbolic-regression backends installed.</td>
           </tr>
         </tbody>
       </table>
+      <p class="footer-note">
+        The current defaults are benchmark-backed. For most users, the main
+        knobs worth changing first are <code>parameter_shrinkage</code>,
+        <code>include_interactions</code>, and <code>preserve_proxy_pairs</code>.
+      </p>
     </section>
 
     <section class="card">
