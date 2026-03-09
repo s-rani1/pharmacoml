@@ -4,25 +4,27 @@
 
 ## What It Is
 
-`pharmacoml` helps pharmacometricians identify and prioritize likely covariates
-from subject-level EBEs or individual parameters before formal model
-confirmation. It is designed to work with outputs from `NONMEM`, `nlmixr2`,
-`Monolix`, `Pumas`, or similar mixed-effects workflows.
+`pharmacoml` helps pharmacometricians use a **hybrid AI/ML screening workflow**
+to identify and prioritize likely covariates from subject-level EBEs or
+individual parameters before formal model confirmation. It is designed to work
+with outputs from `NONMEM`, `nlmixr2`, `Monolix`, `Pumas`, or similar
+mixed-effects workflows.
 
 The current release is evaluated against a fixed public benchmark suite that
 includes real public PK examples and paper-style benchmark scenarios.
 
 ## What It Is Not
 
-`pharmacoml` is **not** a replacement for final NLME estimation or confirmation
-in the current release. It is a **covariate screening and preselection** tool
-designed to reduce search space before SCM, backward elimination, or final
-model fitting.
+`pharmacoml` is **not** a replacement for final NLME estimation, full model
+search, or pharmacometric confirmation in the current release. It is a
+**hybrid AI/ML covariate screening and preselection** tool designed to reduce
+search space before SCM, backward elimination, or final model fitting.
 
 ## Why It Is Different
 
+- Uses a hybrid AI/ML screening workflow that combines explainable ML discovery, penalized confirmation, and SCM-style bridging instead of relying on a single method.
 - Works with EBEs or individual parameters from any solver, including `NONMEM`, `nlmixr2`, `Monolix`, and `Pumas`, so screening is not tied to a single estimation engine.
-- Combines a multi-engine hybrid screening pipeline with many supported engines, including explainable boosting, `AALASSO`, `STG`, and an SCM-style bridge, rather than relying on a single screening model.
+- Supports many screening backends, including explainable boosting, `AALASSO`, `STG`, and an SCM-style bridge, rather than relying on a single screening model.
 - Includes pharmacometric screening features such as shrinkage-aware logic, biology-aware proxy preservation, and optional interaction screening.
 - Ships with a public benchmark suite, pinned baselines, and generated benchmark reports so workflow changes can be evaluated against fixed reference cases.
 
