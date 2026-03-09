@@ -166,6 +166,7 @@ Rendered docs are available via GitHub Pages:
 - [Overview](https://s-rani1.github.io/pharmacoml/)
 - [Tutorial](https://s-rani1.github.io/pharmacoml/tutorial.html)
 - [Benchmarks](https://s-rani1.github.io/pharmacoml/benchmarks.html)
+- [Reference](https://s-rani1.github.io/pharmacoml/reference.html)
 
 ## Methodological References
 

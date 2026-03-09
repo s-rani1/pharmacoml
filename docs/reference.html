@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pharmacoml Reference</title>
+  <link rel="stylesheet" href="site.css">
+  <script defer src="site.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark"></span>
+          <span>pharmacoml docs</span>
+        </a>
+        <nav class="nav">
+          <a href="index.html">Overview</a>
+          <a href="tutorial.html">Tutorial</a>
+          <a href="benchmarks.html">Benchmarks</a>
+          <a class="active" href="reference.html">Reference</a>
+        </nav>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="eyebrow">Reference</div>
+      <h1>Command and API reference</h1>
+      <p>
+        This page collects the detailed usage patterns for the current release:
+        installation commands, benchmark commands, the main <code>HybridScreener</code>
+        workflow, output methods, and the experimental consensus namespace.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Installation commands</h2>
+      </div>
+      <div class="stack">
+        <div>
+          <p><strong>Install from PyPI</strong></p>
+          <pre><code>pip install pharmacoml</code></pre>
+        </div>
+        <div>
+          <p><strong>Install from GitHub</strong></p>
+          <pre><code>pip install git+https://github.com/s-rani1/pharmacoml.git</code></pre>
+        </div>
+        <div>
+          <p><strong>Editable install for development</strong></p>
+          <pre><code>git clone https://github.com/s-rani1/pharmacoml.git
+cd pharmacoml
+pip install -e ".[dev]"</code></pre>
+        </div>
+        <div>
+          <p><strong>Optional extras</strong></p>
+          <pre><code>pip install -e ".[dev,dl,symbolic]"</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Main API</h2>
+        <p>The default production path is <code>HybridScreener</code>.</p>
+      </div>
+      <pre><code>from pharmacoml.covselect import HybridScreener
+
+report = HybridScreener(
+    include_scm=True,
+    rfe_enabled=True,
+    shrinkage_awareness=True,
+    include_interactions=False,
+    include_symbolic=False,
+).fit(
+    ebes=ebes,
+    covariates=covariates,
+    parameter_shrinkage={"CL": 0.12, "V": 0.28},
+)</code></pre>
+      <div class="two-col" style="margin-top: 1.25rem;">
+        <div>
+          <p><strong>Required inputs</strong></p>
+          <ul>
+            <li><code>ebes</code>: one row per subject, columns such as <code>CL</code>, <code>V</code>, <code>KA</code>, or other subject-level parameters</li>
+            <li><code>covariates</code>: one row per subject, aligned to <code>ebes</code></li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Optional credibility inputs</strong></p>
+          <ul>
+            <li><code>parameter_shrinkage</code>: explicit shrinkage values from the base model</li>
+            <li><code>preserve_proxy_pairs</code>: user-specified biologically distinct proxy pairs</li>
+            <li><code>include_interactions</code>: post-RFE interaction screening</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Common <code>HybridScreener</code> options</h2>
+      </div>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>Option</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>include_scm</code></td>
+            <td>Enable the SCM-style confirmation layer</td>
+          </tr>
+          <tr>
+            <td><code>rfe_enabled</code></td>
+            <td>Use the benchmark-backed recursive feature elimination path</td>
+          </tr>
+          <tr>
+            <td><code>shrinkage_awareness</code></td>
+            <td>Apply shrinkage-aware calibration when shrinkage information or low-information proxy signals are available</td>
+          </tr>
+          <tr>
+            <td><code>parameter_shrinkage</code></td>
+            <td>Pass known per-parameter shrinkage values from your base model</td>
+          </tr>
+          <tr>
+            <td><code>include_interactions</code></td>
+            <td>Generate and screen pairwise interaction terms after the main-effect RFE path</td>
+          </tr>
+          <tr>
+            <td><code>interaction_top_n</code></td>
+            <td>Limit interaction generation to the strongest retained main effects</td>
+          </tr>
+          <tr>
+            <td><code>preserve_proxy_pairs</code></td>
+            <td>Keep biologically distinct but highly correlated covariates such as <code>AGE</code> and <code>PMA</code></td>
+          </tr>
+          <tr>
+            <td><code>include_symbolic</code></td>
+            <td>Enable symbolic structure search</td>
+          </tr>
+          <tr>
+            <td><code>symbolic_backend</code></td>
+            <td>Select <code>basis</code>, <code>gplearn</code>, or <code>pysr</code> when symbolic screening is enabled</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Output methods</h2>
+      </div>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Meaning</th>
+            <th>Typical use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>summary()</code></td>
+            <td>Full row-level screening table</td>
+            <td>Detailed inspection and debugging</td>
+          </tr>
+          <tr>
+            <td><code>confirmed_covariates()</code></td>
+            <td>Compact confirmed answer</td>
+            <td>Daily-use summary</td>
+          </tr>
+          <tr>
+            <td><code>candidate_covariates()</code></td>
+            <td>Broader shortlist</td>
+            <td>Carry forward to formal PMx confirmation</td>
+          </tr>
+          <tr>
+            <td><code>core_covariates()</code></td>
+            <td>Strongest ML-supported signals</td>
+            <td>Inspect the AI/ML layer directly</td>
+          </tr>
+          <tr>
+            <td><code>proxy_groups()</code></td>
+            <td>Correlated alternatives</td>
+            <td>Interpretation and deduplication</td>
+          </tr>
+          <tr>
+            <td><code>interaction_covariates()</code></td>
+            <td>Surviving interaction terms</td>
+            <td>Interaction review when enabled</td>
+          </tr>
+          <tr>
+            <td><code>to_nonmem_candidates()</code></td>
+            <td>Text export for downstream workflows</td>
+            <td>NONMEM-style candidate block generation</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout" style="margin-top: 1rem;">
+        For most users, the practical order is:
+        <code>confirmed_covariates()</code> →
+        <code>candidate_covariates()</code> →
+        <code>proxy_groups()</code> →
+        <code>to_nonmem_candidates()</code>.
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Benchmark commands</h2>
+      </div>
+      <div class="stack">
+        <pre><code># Run the fixed public benchmark suite and generate reports
+PYTHONPATH=. python benchmarks/run_public_benchmarks.py</code></pre>
+        <pre><code># Enforce the pinned release gate
+PYTHONPATH=. python benchmarks/run_public_benchmarks.py --check</code></pre>
+        <pre><code># Write reports to a custom directory
+PYTHONPATH=. python benchmarks/run_public_benchmarks.py --report-dir docs/reports</code></pre>
+        <pre><code># Skip report artifacts
+PYTHONPATH=. python benchmarks/run_public_benchmarks.py --no-report</code></pre>
+      </div>
+      <p class="footer-note">
+        The benchmark runner writes Markdown, CSV, and JSON report artifacts by default.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Experimental namespace</h2>
+        <p>
+          Use the experimental module for advanced benchmarking and model-family
+          comparison. The default daily-use recommendation remains
+          <code>HybridScreener</code>.
+        </p>
+      </div>
+      <pre><code>from pharmacoml.covselect.experimental import MultiModelConsensusScreener
+
+report = MultiModelConsensusScreener(
+    top_k=3,
+    n_bootstrap=8,
+    include_neural=False,
+).fit(ebes, covariates)
+
+report.consensus_covariates()
+report.selection_frequency_table()
+report.family_summary()
+report.compare_with_hybrid(ebes, covariates)</code></pre>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Practical guidance</h2>
+      </div>
+      <div class="two-col">
+        <div>
+          <p><strong>Use <code>HybridScreener</code> when:</strong></p>
+          <ul>
+            <li>you want a benchmark-backed shortlist for routine PMx work</li>
+            <li>you have EBEs or individual parameters from a base model</li>
+            <li>you want a compact <code>confirmed</code> answer plus a broader shortlist</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Use the experimental namespace when:</strong></p>
+          <ul>
+            <li>you want model-family comparison</li>
+            <li>you are benchmarking or stress-testing the hybrid workflow</li>
+            <li>you are comfortable with a research-oriented interface</li>
+          </ul>
+        </div>
+      </div>
+      <p class="footer-note">
+        <strong>Important:</strong> <code>pharmacoml</code> is a covariate screening
+        and preselection tool. It is not a replacement for final NLME estimation
+        or confirmation.
+      </p>
+    </section>
+  </div>
+</body>
+</html>
