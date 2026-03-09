@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      PYTHONPATH: .
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build twine
+          python -m pip install -e ".[dev]"
+
+      - name: Run stable test surface
+        run: |
+          pytest tests/test_covselect/test_screener.py \
+                 tests/test_covselect/test_selection_utils.py \
+                 tests/test_covselect/test_hybrid.py \
+                 tests/test_covselect/test_ensemble.py \
+                 tests/test_covselect/test_hybrid_extensions.py \
+                 tests/test_covselect/test_experimental_consensus.py \
+                 tests/test_covselect/test_benchmark_reports.py -q
+
+      - name: Build package
+        run: python -m build --no-isolation --outdir dist_ci
+
+      - name: Check package metadata
+        run: python -m twine check dist_ci/*

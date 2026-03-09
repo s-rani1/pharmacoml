@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pharmacoml Docs</title>
+  <link rel="stylesheet" href="site.css">
+  <script defer src="site.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark"></span>
+          <span>pharmacoml docs</span>
+        </a>
+        <nav class="nav">
+          <a class="active" href="index.html">Overview</a>
+          <a href="tutorial.html">Tutorial</a>
+          <a href="benchmarks.html">Benchmarks</a>
+        </nav>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="eyebrow">Hybrid PMx-ML</div>
+      <div class="hero-copy">
+        <h1>Benchmark-backed covariate screening for pharmacometrics</h1>
+        <p>
+          <strong>pharmacoml</strong> is a hybrid AI/ML-assisted covariate
+          screening toolkit for popPK/popPD workflows. It is designed to
+          identify and prioritize likely covariates from EBEs or individual
+          parameters before formal pharmacometric confirmation.
+        </p>
+        <div class="button-row">
+          <a class="button" href="tutorial.html">Open Tutorial</a>
+          <a class="button secondary" href="benchmarks.html">View Benchmarks</a>
+        </div>
+      </div>
+      <div class="kpis">
+        <div class="kpi">
+          <span class="kpi-value">Hybrid</span>
+          <span class="kpi-label">SHAP/RFE + AALASSO + SCM-style confirmation</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-value">8-case</span>
+          <span class="kpi-label">Fixed public benchmark release suite</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-value">Alpha</span>
+          <span class="kpi-label">Community-ready, not a NONMEM replacement</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="feature">
+        <h3>What it is</h3>
+        <p>
+          A <strong>covariate screening and preselection</strong> tool for
+          pharmacometric workflows. It helps narrow the search space before
+          SCM, backward elimination, or final NLME confirmation.
+        </p>
+      </section>
+      <section class="feature">
+        <h3>What it is not</h3>
+        <p>
+          It is <strong>not</strong> a replacement for NONMEM, nlmixr2, or full
+          population-model validation. Final confirmation still belongs in the
+          pharmacometric model.
+        </p>
+      </section>
+      <section class="feature">
+        <h3>How it works</h3>
+        <p>
+          The default workflow combines boosting-based discovery, benchmark-backed
+          RFE, AALASSO confirmation, shrinkage-aware logic, optional interaction
+          screening, and an SCM-style bridge.
+        </p>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Core workflow</h2>
+        <p>What users typically run on a new dataset.</p>
+      </div>
+      <div class="interactive-shell" data-workflow>
+        <div class="step-buttons">
+          <button class="step-button active" type="button" data-workflow-step data-title="Start from a base model" data-body="pharmacoml expects subject-level parameters or EBEs from a fitted base model, plus aligned subject covariates." data-code="ebes = df[[&quot;CL&quot;, &quot;V&quot;, &quot;KA&quot;]]&#10;covariates = df[[&quot;WT&quot;, &quot;AGE&quot;, &quot;SEX&quot;, &quot;CRCL&quot;]]">1. Base model</button>
+          <button class="step-button" type="button" data-workflow-step data-title="Run the hybrid screener" data-body="The benchmark-backed default workflow combines SHAP/RFE discovery, AALASSO confirmation, shrinkage-aware logic, and optional SCM confirmation." data-code="report = HybridScreener(&#10;    include_scm=True,&#10;    include_interactions=False,&#10;).fit(ebes=ebes, covariates=covariates)">2. Screen</button>
+          <button class="step-button" type="button" data-workflow-step data-title="Inspect tiered outputs" data-body="Users review the strongest signals, the broader shortlist, correlated proxies, and any SCM-style confirmed covariates." data-code="report.confirmed_covariates()&#10;report.candidate_covariates()&#10;report.proxy_groups()">3. Review</button>
+          <button class="step-button" type="button" data-workflow-step data-title="Carry candidates forward" data-body="The package is designed to reduce covariate search space before formal PMx confirmation, not replace it." data-code="print(report.to_nonmem_candidates())">4. Confirm downstream</button>
+        </div>
+        <div class="interactive-panel">
+          <h3 data-workflow-title></h3>
+          <p data-workflow-body></p>
+          <pre><code data-workflow-code></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Quick code snapshot</h2>
+      </div>
+      <pre><code>from pharmacoml.covselect import HybridScreener
+
+report = HybridScreener(
+    include_scm=True,
+    include_interactions=False,
+).fit(
+    ebes=ebes,
+    covariates=covariates,
+    parameter_shrinkage={"CL": 0.12, "V": 0.28},
+)
+
+report.confirmed_covariates()
+report.candidate_covariates()
+report.proxy_groups()</code></pre>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Outputs users actually care about</h2>
+      </div>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>Output</th>
+            <th>Meaning</th>
+            <th>Typical use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>core_covariates()</code></td>
+            <td>Strongest ML-supported signals</td>
+            <td>Initial review</td>
+          </tr>
+          <tr>
+            <td><code>candidate_covariates()</code></td>
+            <td>Practical shortlist to carry forward</td>
+            <td>SCM/backward elimination input</td>
+          </tr>
+          <tr>
+            <td><code>confirmed_covariates()</code></td>
+            <td>Compact answer after SCM-style confirmation</td>
+            <td>Daily-use summary</td>
+          </tr>
+          <tr>
+            <td><code>proxy_groups()</code></td>
+            <td>Correlated alternatives</td>
+            <td>Interpretation and de-duplication</td>
+          </tr>
+          <tr>
+            <td><code>to_nonmem_candidates()</code></td>
+            <td>Export-ready candidate block</td>
+            <td>Downstream PMx workflow</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Why this is different</h2>
+        <p>
+          <strong>pharmacoml</strong> is not positioned as a full automated model
+          builder like pyDarwin. It is positioned as a
+          <strong>hybrid AI/ML covariate screener</strong>:
+        </p>
+      </div>
+      <ul>
+        <li>ML discovery for nonlinear and correlated signal</li>
+        <li>Penalized confirmation to reduce false positives</li>
+        <li>Traditional/statistical PMx bridge for credibility</li>
+        <li>Benchmark-gated defaults and public reporting</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>

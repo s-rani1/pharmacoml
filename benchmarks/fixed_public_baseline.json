@@ -1,0 +1,105 @@
+{
+  "suite": "release_hybrid_screener",
+  "captured_on": "2026-03-08",
+  "cases": [
+    {
+      "name": "pheno",
+      "primary_tier": "candidate",
+      "source": "Pharmpy phenobarbital example"
+    },
+    {
+      "name": "eleveld_union",
+      "primary_tier": "confirmed",
+      "source": "Eleveld/Wahlquist public propofol data"
+    },
+    {
+      "name": "ggpmx_theophylline",
+      "primary_tier": "candidate",
+      "source": "ggPMX Monolix theophylline example"
+    },
+    {
+      "name": "high_shrinkage_user_input",
+      "primary_tier": "candidate",
+      "source": "High-shrinkage synthetic benchmark with explicit user shrinkage"
+    },
+    {
+      "name": "age_pma_distinct",
+      "primary_tier": "candidate",
+      "source": "Biological AGE/PMA proxy-preservation benchmark"
+    },
+    {
+      "name": "interaction_xor_screening",
+      "primary_tier": "candidate",
+      "source": "Interaction screening benchmark"
+    },
+    {
+      "name": "asiimwe_correlated_small_n",
+      "primary_tier": "candidate",
+      "source": "Asiimwe-style public correlated-covariate simulation"
+    },
+    {
+      "name": "shapcov_collinear",
+      "primary_tier": "candidate",
+      "source": "Shap-Cov-style public collinear simulation"
+    }
+  ],
+  "thresholds": {
+    "min_mean_precision": 0.65,
+    "min_mean_recall": 0.75,
+    "min_mean_f1": 0.70,
+    "max_mean_fdr": 0.35,
+    "min_case_f1": 0.30,
+    "min_case_precision": 0.25
+  },
+  "recommended_defaults": {
+    "rfe_enabled": true,
+    "shrinkage_awareness": true,
+    "reason": "RFE and shrinkage-awareness both improve the release-gate primary score on the fixed public suite, with the combined variant performing best."
+  },
+  "summary": [
+    {
+      "variant": "baseline",
+      "cases": 8,
+      "mean_precision": 0.668375,
+      "mean_recall": 0.85,
+      "mean_F1": 0.725125,
+      "mean_FDR": 0.331625,
+      "primary_score": 0.7024,
+      "rfe_enabled": false,
+      "shrinkage_awareness": false
+    },
+    {
+      "variant": "rfe",
+      "cases": 8,
+      "mean_precision": 0.724625,
+      "mean_recall": 0.875,
+      "mean_F1": 0.77075,
+      "mean_FDR": 0.27537500000000004,
+      "primary_score": 0.7523,
+      "rfe_enabled": true,
+      "shrinkage_awareness": false
+    },
+    {
+      "variant": "shrinkage",
+      "cases": 8,
+      "mean_precision": 0.75175,
+      "mean_recall": 0.85,
+      "mean_F1": 0.787625,
+      "mean_FDR": 0.24825,
+      "primary_score": 0.7733,
+      "rfe_enabled": false,
+      "shrinkage_awareness": true
+    },
+    {
+      "variant": "rfe+shrinkage",
+      "cases": 8,
+      "mean_precision": 0.808,
+      "mean_recall": 0.875,
+      "mean_F1": 0.83325,
+      "mean_FDR": 0.192,
+      "primary_score": 0.8232,
+      "rfe_enabled": true,
+      "shrinkage_awareness": true
+    }
+  ]
+}

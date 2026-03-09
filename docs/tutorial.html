@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pharmacoml Tutorial</title>
+  <link rel="stylesheet" href="site.css">
+  <script defer src="site.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark"></span>
+          <span>pharmacoml docs</span>
+        </a>
+        <nav class="nav">
+          <a href="index.html">Overview</a>
+          <a class="active" href="tutorial.html">Tutorial</a>
+          <a href="benchmarks.html">Benchmarks</a>
+        </nav>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="eyebrow">Tutorial</div>
+      <h1>Run <code>pharmacoml</code> on a new dataset</h1>
+      <p>
+        This tutorial shows the most common workflow: start with subject-level
+        parameters or EBEs plus covariates, run the hybrid screener, inspect the
+        shortlist, and export candidate covariates for downstream PMx confirmation.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>What the package expects</h2>
+      </div>
+      <div class="two-col">
+        <div>
+          <p><strong>Input 1: EBEs or individual parameters</strong></p>
+          <p>
+            One row per subject with columns such as <code>CL</code>,
+            <code>V</code>, <code>KA</code>, or other subject-level PK/PD
+            quantities derived from a base model.
+          </p>
+        </div>
+        <div>
+          <p><strong>Input 2: Covariates</strong></p>
+          <p>
+            One row per subject with columns such as <code>WT</code>,
+            <code>AGE</code>, <code>SEX</code>, <code>CRCL</code>, and
+            <code>ALB</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Example input files</h2>
+      </div>
+      <div data-tabs>
+        <div class="tab-buttons">
+          <button class="tab-button active" type="button" data-tab-target="separate-files">Separate files</button>
+          <button class="tab-button" type="button" data-tab-target="merged-file">Merged file</button>
+        </div>
+
+        <div class="tab-panel" data-tab-panel="separate-files">
+          <div class="two-col">
+            <div>
+              <p><strong><code>ebes.csv</code></strong></p>
+              <pre><code>ID,CL,V,KA
+1,5.21,48.3,1.10
+2,6.03,55.1,0.92
+3,4.88,44.7,1.25
+4,5.67,51.0,1.05</code></pre>
+            </div>
+            <div>
+              <p><strong><code>covariates.csv</code></strong></p>
+              <pre><code>ID,WT,AGE,SEX,CRCL,ALB
+1,72,55,1,88,4.1
+2,81,49,0,95,3.8
+3,64,63,1,70,4.0
+4,77,46,0,91,4.2</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-tab-panel="merged-file" hidden>
+          <p><strong><code>analysis_dataset.csv</code></strong></p>
+          <pre><code>ID,CL,V,KA,WT,AGE,SEX,CRCL,ALB
+1,5.21,48.3,1.10,72,55,1,88,4.1
+2,6.03,55.1,0.92,81,49,0,95,3.8
+3,4.88,44.7,1.25,64,63,1,70,4.0
+4,5.67,51.0,1.05,77,46,0,91,4.2</code></pre>
+          <p class="footer-note">
+            The package only needs two logical inputs. They can come from two
+            files or from one already merged analysis dataset.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Basic run</h2>
+      </div>
+      <div data-tabs>
+        <div class="tab-buttons">
+          <button class="tab-button active" type="button" data-tab-target="run-separate">Two-file workflow</button>
+          <button class="tab-button" type="button" data-tab-target="run-merged">Single merged file</button>
+        </div>
+        <div class="tab-panel" data-tab-panel="run-separate">
+          <pre><code>import pandas as pd
+from pharmacoml.covselect import HybridScreener
+
+ebes = pd.read_csv("ebes.csv")
+covariates = pd.read_csv("covariates.csv")
+
+df = ebes.merge(covariates, on="ID")
+
+ebe_cols = ["CL", "V", "KA"]
+cov_cols = ["WT", "AGE", "SEX", "CRCL", "ALB"]
+
+report = HybridScreener(include_scm=True).fit(
+    ebes=df[ebe_cols],
+    covariates=df[cov_cols],
+)
+
+print(report.confirmed_covariates())
+print(report.candidate_covariates())
+print(report.proxy_groups())
+print(report.to_nonmem_candidates())</code></pre>
+        </div>
+        <div class="tab-panel" data-tab-panel="run-merged" hidden>
+          <pre><code>import pandas as pd
+from pharmacoml.covselect import HybridScreener
+
+df = pd.read_csv("analysis_dataset.csv")
+
+report = HybridScreener(include_scm=True).fit(
+    ebes=df[["CL", "V", "KA"]],
+    covariates=df[["WT", "AGE", "SEX", "CRCL", "ALB"]],
+)
+
+print(report.confirmed_covariates())
+print(report.candidate_covariates())</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Optional: supply shrinkage</h2>
+        <p>
+          If you know ETA shrinkage from your base model, pass it in. This makes
+          screening more pharmacometrically credible for low-information parameters.
+        </p>
+      </div>
+      <pre><code>parameter_shrinkage = {
+    "CL": 0.12,
+    "V": 0.28,
+    "KA": 0.22,
+}
+
+report = HybridScreener(include_scm=True).fit(
+    ebes=df[ebe_cols],
+    covariates=df[cov_cols],
+    parameter_shrinkage=parameter_shrinkage,
+)</code></pre>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Example output</h2>
+        <p>
+          The snapshots below correspond to the toy dataset shown earlier on
+          this page. They are meant to show the shape of the output a user
+          should expect after running the tutorial example.
+        </p>
+      </div>
+      <div data-tabs>
+        <div class="tab-buttons">
+          <button class="tab-button active" type="button" data-tab-target="out-summary">Summary</button>
+          <button class="tab-button" type="button" data-tab-target="out-confirmed">Confirmed</button>
+          <button class="tab-button" type="button" data-tab-target="out-candidate">Candidate</button>
+          <button class="tab-button" type="button" data-tab-target="out-proxy">Proxy</button>
+          <button class="tab-button" type="button" data-tab-target="out-export">NONMEM export</button>
+        </div>
+        <div class="tab-panel" data-tab-panel="out-summary">
+          <p><strong>Summary table</strong></p>
+          <pre><code>  parameter covariate functional_form  combined_score       tier  support_count  scm_selected
+0        CL        WT           power          0.9420       core              3          True
+1        CL       AGE          linear          0.6110  candidate              2         False
+2        CL       BSA          linear          0.4020      proxy              1         False
+3         V        WT           power          0.8870       core              3          True
+4         V       ALB          linear          0.1730   rejected              1         False</code></pre>
+          <p class="footer-note">
+            This is usually the first table users inspect via
+            <code>report.summary()</code>.
+          </p>
+        </div>
+        <div class="tab-panel" data-tab-panel="out-confirmed" hidden>
+          <p><strong>Confirmed covariates</strong></p>
+          <pre><code>  parameter covariate functional_form confirmation_status
+0        CL        WT           power                 scm
+1         V        WT           power                 scm</code></pre>
+        </div>
+        <div class="tab-panel" data-tab-panel="out-candidate" hidden>
+          <p><strong>Candidate covariates</strong></p>
+          <pre><code>  parameter covariate functional_form  combined_score       tier
+0        CL        WT           power          0.9420       core
+1        CL       AGE          linear          0.6110  candidate
+2         V        WT           power          0.8870       core</code></pre>
+        </div>
+        <div class="tab-panel" data-tab-panel="out-proxy" hidden>
+          <p><strong>Proxy groups</strong></p>
+          <pre><code>  parameter proxy_group_id representative proxy_member
+0        CL            G1             WT          BSA</code></pre>
+        </div>
+        <div class="tab-panel" data-tab-panel="out-export" hidden>
+          <p><strong>NONMEM-style candidate block</strong></p>
+          <pre><code># pharmacoml hybrid candidate covariates (nonmem)
+# core = strongest evidence, candidate = carry forward to SCM/backward elimination
+; [CORE] WT -> CL | form=power | score=0.942 scm=yes
+; [CANDIDATE] AGE -> CL | form=linear | score=0.611
+; [CORE] WT -> V | form=power | score=0.887 scm=yes</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Optional advanced modes</h2>
+      </div>
+      <div class="two-col">
+        <div>
+          <p><strong>Interaction screening</strong></p>
+          <pre><code>report = HybridScreener(
+    include_scm=True,
+    include_interactions=True,
+    interaction_top_n=3,
+).fit(df[ebe_cols], df[cov_cols])</code></pre>
+        </div>
+        <div>
+          <p><strong>Symbolic structure search</strong></p>
+          <pre><code>report = HybridScreener(
+    include_symbolic=True,
+    symbolic_backend="basis",
+).fit(df[ebe_cols], df[cov_cols])</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>How to interpret the tiers</h2>
+      </div>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>core</code></td>
+            <td>Strongest ML-supported signals</td>
+          </tr>
+          <tr>
+            <td><code>candidate</code></td>
+            <td>Shortlist to carry into SCM/backward elimination</td>
+          </tr>
+          <tr>
+            <td><code>confirmed</code></td>
+            <td>Compact answer after SCM-style confirmation</td>
+          </tr>
+          <tr>
+            <td><code>proxy</code></td>
+            <td>Correlated alternatives to selected covariates</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="footer-note">
+        <strong>Important:</strong> <code>pharmacoml</code> is a covariate
+        screening and preselection tool. It helps prioritize likely covariates
+        before formal model confirmation; it is not a replacement for full
+        NONMEM, nlmixr2, or final population-model validation.
+      </p>
+    </section>
+  </div>
+</body>
+</html>

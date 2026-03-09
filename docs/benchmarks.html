@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pharmacoml Benchmarks</title>
+  <link rel="stylesheet" href="site.css">
+  <script defer src="site.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark"></span>
+          <span>pharmacoml docs</span>
+        </a>
+        <nav class="nav">
+          <a href="index.html">Overview</a>
+          <a href="tutorial.html">Tutorial</a>
+          <a class="active" href="benchmarks.html">Benchmarks</a>
+        </nav>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="eyebrow">Validation</div>
+      <h1>Fixed public benchmark suite and generated reports</h1>
+      <p>
+        <strong>pharmacoml</strong> uses benchmark-gated development. The default
+        hybrid workflow is evaluated on a fixed public suite, and the benchmark
+        runner now writes a reusable Markdown/CSV/JSON report bundle for GitHub
+        and release documentation.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Run the benchmark suite</h2>
+      </div>
+      <pre><code>PYTHONPATH=. python benchmarks/run_public_benchmarks.py --check</code></pre>
+      <p>
+        By default this command prints the benchmark summary and writes report
+        artifacts to <code>benchmarks/reports/fixed_public/</code>.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Generated report artifacts</h2>
+      </div>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>public_benchmark_report.md</code></td>
+            <td>Human-readable benchmark report for GitHub/docs</td>
+          </tr>
+          <tr>
+            <td><code>public_benchmark_summary.csv</code></td>
+            <td>Variant-level metrics summary</td>
+          </tr>
+          <tr>
+            <td><code>public_benchmark_details.csv</code></td>
+            <td>Per-case performance details</td>
+          </tr>
+          <tr>
+            <td><code>public_benchmark_report.json</code></td>
+            <td>Structured machine-readable report bundle</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Current fixed release suite</h2>
+      </div>
+      <div class="interactive-shell" data-benchmark-explorer>
+        <div class="chip-row">
+          <button class="chip active" type="button" data-benchmark-case data-case-title="pheno" data-case-summary="Real phenobarbital example from Pharmpy. Useful for checking recovery of strong weight effects and a weaker secondary covariate." data-case-tier="candidate" data-case-truth="CL/WGT, VC/WGT, VC/ASPHYXIA" data-case-reason="small real-world popPK benchmark">pheno</button>
+          <button class="chip" type="button" data-benchmark-case data-case-title="eleveld_union" data-case-summary="Large public propofol benchmark used as a union-level covariate recovery check against the published implemented model." data-case-tier="confirmed" data-case-truth="AGE, WGT, HGT, M1F2, A1V2, TECH, PMA" data-case-reason="strong large-scale real-data agreement">eleveld_union</button>
+          <button class="chip" type="button" data-benchmark-case data-case-title="ggpmx_theophylline" data-case-summary="Public Monolix-derived benchmark that helps reveal whether the workflow becomes too conservative on weaker clearance effects." data-case-tier="candidate" data-case-truth="V/WT0, CL/WT0, CL/AGE0, CL/SEX_1, CL/STUD_2" data-case-reason="stress test for weaker real effects">ggpmx_theophylline</button>
+          <button class="chip" type="button" data-benchmark-case data-case-title="high_shrinkage_user_input" data-case-summary="Synthetic case with explicit user-supplied shrinkage to validate that unreliable parameters are penalized or suppressed correctly." data-case-tier="candidate" data-case-truth="CL/WT" data-case-reason="tests shrinkage-aware credibility logic">high_shrinkage</button>
+          <button class="chip" type="button" data-benchmark-case data-case-title="age_pma_distinct" data-case-summary="Checks that highly correlated but biologically distinct variables like AGE and PMA can both survive the proxy-deduplication logic." data-case-tier="candidate" data-case-truth="CL/WT, CL/AGE, CL/PMA" data-case-reason="tests biology-aware proxy preservation">age_pma_distinct</button>
+          <button class="chip" type="button" data-benchmark-case data-case-title="interaction_xor_screening" data-case-summary="Synthetic interaction case that verifies the post-RFE interaction pass can recover non-additive structure." data-case-tier="candidate" data-case-truth="CL/COPD__xor__SMK" data-case-reason="tests interaction screening">interaction_xor</button>
+          <button class="chip" type="button" data-benchmark-case data-case-title="asiimwe_correlated_small_n" data-case-summary="Paper-style correlated-covariate simulation for small-to-moderate sample settings." data-case-tier="candidate" data-case-truth="scenario-specific correlated truth" data-case-reason="tests correlated-covariate behavior">asiimwe_style</button>
+          <button class="chip" type="button" data-benchmark-case data-case-title="shapcov_collinear" data-case-summary="Collinear simulation aligned with the Shap-Cov-style validation framing." data-case-tier="candidate" data-case-truth="scenario-specific collinear truth" data-case-reason="tests shortlist behavior under collinearity">shapcov_collinear</button>
+        </div>
+        <div class="interactive-panel">
+          <h3 data-case-title></h3>
+          <p data-case-summary></p>
+          <div class="metric-grid" data-case-metrics></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>How to read the benchmark output</h2>
+      </div>
+      <div class="two-col">
+        <div>
+          <p><strong>Primary summary</strong></p>
+          <p>
+            Compares configuration variants like baseline, RFE, shrinkage-aware,
+            and combined workflows across the fixed suite.
+          </p>
+        </div>
+        <div>
+          <p><strong>Per-case details</strong></p>
+          <p>
+            Shows precision, recall, F1, and FDR for each benchmark case, which
+            is what you use to understand where the workflow helps and where it
+            is still conservative.
+          </p>
+        </div>
+      </div>
+      <div class="callout">
+        The benchmark gate is used to choose defaults. New features should only
+        become default behavior if they improve or preserve the pinned public
+        baseline.
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Useful command variants</h2>
+      </div>
+      <div data-tabs>
+        <div class="tab-buttons">
+          <button class="tab-button active" type="button" data-tab-target="cmd-run">Run + report</button>
+          <button class="tab-button" type="button" data-tab-target="cmd-check">Gate check</button>
+          <button class="tab-button" type="button" data-tab-target="cmd-custom">Custom output</button>
+        </div>
+        <div class="tab-panel" data-tab-panel="cmd-run">
+          <pre><code># write report bundle to the default location
+PYTHONPATH=. python benchmarks/run_public_benchmarks.py
+          </code></pre>
+        </div>
+        <div class="tab-panel" data-tab-panel="cmd-check" hidden>
+          <pre><code># run gate check
+PYTHONPATH=. python benchmarks/run_public_benchmarks.py --check</code></pre>
+        </div>
+        <div class="tab-panel" data-tab-panel="cmd-custom" hidden>
+          <pre><code># write report somewhere else
+PYTHONPATH=. python benchmarks/run_public_benchmarks.py --report-dir docs/reports
+
+# skip artifact generation
+PYTHONPATH=. python benchmarks/run_public_benchmarks.py --no-report</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
