@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68.0", "wheel"]
+requires = ["setuptools>=77.0", "wheel", "packaging>=24.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,8 @@ name = "pharmacoml"
 version = "0.1.1"
 description = "ML-Enhanced Pharmacometrics Toolkit"
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 authors = [{name = "Sai Rani"}]
 keywords = ["pharmacometrics", "machine-learning", "covariate-selection", "SHAP", "population-PK", "NONMEM"]
@@ -30,9 +31,6 @@ Repository = "https://github.com/s-rani1/pharmacoml"
 
 [tool.setuptools.packages.find]
 include = ["pharmacoml*"]
-
-[tool.setuptools]
-license-files = []
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
