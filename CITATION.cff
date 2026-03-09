@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use pharmacoml in your work, please cite the software using the metadata below."
+title: "pharmacoml"
+version: "0.1.1"
+date-released: 2026-03-08
+type: software
+license: MIT
+repository-code: "https://github.com/s-rani1/pharmacoml"
+url: "https://github.com/s-rani1/pharmacoml"
+authors:
+  - given-names: "Sai"
+    family-names: "Rani"
+    alias: "s-rani1"
+abstract: "Benchmark-backed hybrid AI/ML covariate screening toolkit for population PK/PD, combining explainable ML discovery, penalized confirmation, and SCM-style bridging in an estimation-tool-agnostic Python workflow."

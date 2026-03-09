@@ -14,9 +14,10 @@ includes real public PK examples and paper-style benchmark scenarios.
 
 ## What It Is Not
 
-`pharmacoml` is **not** a replacement for `NONMEM`, `nlmixr2`, or final NLME
-confirmation. It is a **covariate screening and preselection** tool that helps
-reduce search space before SCM, backward elimination, or final model fitting.
+`pharmacoml` is **not** a replacement for final NLME estimation or confirmation
+in the current release. It is a **covariate screening and preselection** tool
+designed to reduce search space before SCM, backward elimination, or final
+model fitting.
 
 ## Why It Is Different
 
@@ -145,10 +146,30 @@ Static docs pages live in `docs/` and are suitable for GitHub Pages:
 
 ## Methodological References
 
-The current workflow is informed by recent pharmacometric ML literature,
-including Sibieude et al. (2021), Asiimwe et al. (2024), Brooks et al. (2025),
-Karlsen et al. (2025), and Kekic et al. (2026). These are inspirations for the
-implemented workflow, not exact ports of any author-provided code.
+The default hybrid workflow implements and combines approaches described in
+recent pharmacometric ML literature on covariate screening, including
+Sibieude et al. (2021), Asiimwe et al. (2024), Brooks et al. (2025), Karlsen
+et al. (2025), and Kekic et al. (2026).
+The broader package also includes additional experimental screening and
+benchmarking capabilities.
+
+## How to Cite
+
+If you use `pharmacoml` in your work, please cite the software repository.
+GitHub will also expose citation metadata directly via the repository citation
+panel.
+
+Suggested citation:
+
+```text
+Rani S. pharmacoml: Benchmark-backed hybrid AI/ML covariate screening toolkit
+for population PK/PD. Version 0.1.1. GitHub.
+https://github.com/s-rani1/pharmacoml
+```
+
+When relevant, also cite the methodological papers that informed the workflow,
+especially Sibieude et al. (2021), Asiimwe et al. (2024), Brooks et al. (2025),
+Karlsen et al. (2025), and Kekic et al. (2026).
 
 ## Roadmap
 
