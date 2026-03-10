@@ -79,6 +79,11 @@ report.proxy_groups()           # correlated alternatives
 print(report.to_nonmem_candidates())
 ```
 
+For reproducible runs, set a fixed `random_state`. In the current release,
+the default hybrid workflow is stable across repeated runs when the data,
+settings, and random seed are unchanged. Experimental or more stochastic paths
+may vary more across runs and environments.
+
 Example `confirmed_covariates()` output:
 
 ```text
@@ -112,6 +117,9 @@ For most users, the practical reading order is:
 3. `proxy_groups()`
 4. `to_nonmem_candidates()`
 
+For reproducibility, keep `random_state` fixed when comparing runs or
+benchmarking workflow changes.
+
 ## Benchmarks
 
 `pharmacoml` includes a fixed public benchmark suite for release calibration:
@@ -122,6 +130,23 @@ For most users, the practical reading order is:
 - `Asiimwe-style` correlated-covariate simulation
 - `Shap-Cov-style` collinear simulation
 - optional `Kekic` public synthetic scenarios when available locally
+
+Current agreement snapshot for the benchmark-backed default workflow:
+
+| Dataset | Agreement |
+|---|---|
+| `pheno` | Exact |
+| `eleveld_union` | Exact |
+| `ggpmx_theophylline` | Exact |
+| `high_shrinkage_user_input` | Exact |
+| `age_pma_distinct` | Exact |
+| `interaction_xor_screening` | Exact |
+| `asiimwe_correlated_small_n` | Partial |
+| `shapcov_collinear` | Partial |
+
+The current fixed benchmark suite shows exact agreement on the real/public PK
+cases and targeted shrinkage, proxy, and interaction checks, with remaining
+errors concentrated in the hardest collinearity-heavy synthetic scenarios.
 
 Run the benchmark suite:
 

@@ -82,6 +82,63 @@
       <div class="section-head">
         <h2>Current fixed release suite</h2>
       </div>
+      <p>
+        The current benchmark-backed default workflow has exact agreement on the
+        real/public PK cases and several targeted synthetic checks, with the
+        remaining gaps concentrated in the hardest collinearity-heavy synthetic
+        scenarios.
+      </p>
+      <table class="mini-table" style="margin-bottom: 1.25rem;">
+        <thead>
+          <tr>
+            <th>Dataset</th>
+            <th>Target / published covariates</th>
+            <th>Current agreement</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>pheno</code></td>
+            <td><code>CL/WGT</code>, <code>VC/WGT</code>, <code>VC/ASPHYXIA</code></td>
+            <td>Exact</td>
+          </tr>
+          <tr>
+            <td><code>eleveld_union</code></td>
+            <td><code>A1V2</code>, <code>AGE</code>, <code>HGT</code>, <code>M1F2</code>, <code>PMA</code>, <code>TECH</code>, <code>WGT</code></td>
+            <td>Exact</td>
+          </tr>
+          <tr>
+            <td><code>ggpmx_theophylline</code></td>
+            <td><code>CL/AGE0</code>, <code>CL/SEX_1</code>, <code>CL/STUD_2</code>, <code>CL/WT0</code>, <code>V/WT0</code></td>
+            <td>Exact</td>
+          </tr>
+          <tr>
+            <td><code>high_shrinkage_user_input</code></td>
+            <td><code>CL/WT</code></td>
+            <td>Exact</td>
+          </tr>
+          <tr>
+            <td><code>age_pma_distinct</code></td>
+            <td><code>CL/AGE</code>, <code>CL/PMA</code>, <code>CL/WT</code></td>
+            <td>Exact</td>
+          </tr>
+          <tr>
+            <td><code>interaction_xor_screening</code></td>
+            <td><code>CL/COPD</code>, <code>CL/SMK</code>, <code>CL/COPD__xor__SMK</code></td>
+            <td>Exact</td>
+          </tr>
+          <tr>
+            <td><code>asiimwe_correlated_small_n</code></td>
+            <td><code>CL/CRCL</code>, <code>CL/SEX</code>, <code>CL/WT</code>, <code>V/WT</code></td>
+            <td>Partial</td>
+          </tr>
+          <tr>
+            <td><code>shapcov_collinear</code></td>
+            <td><code>CL/AGE</code>, <code>CL/CRCL</code>, <code>CL/WT</code>, <code>V/WT</code></td>
+            <td>Partial</td>
+          </tr>
+        </tbody>
+      </table>
       <div class="interactive-shell" data-benchmark-explorer>
         <div class="chip-row">
           <button class="chip active" type="button" data-benchmark-case data-case-title="pheno" data-case-summary="Real phenobarbital example from Pharmpy. Useful for checking recovery of strong weight effects and a weaker secondary covariate." data-case-tier="candidate" data-case-truth="CL/WGT, VC/WGT, VC/ASPHYXIA" data-case-reason="small real-world popPK benchmark">pheno</button>
