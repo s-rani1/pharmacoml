@@ -12,7 +12,7 @@ from pharmacoml.covselect.shapcov import ShapCovScreener
 from pharmacoml.covselect.significance import CorrelationFilter
 from pharmacoml.covselect.stg import STGScreener
 from pharmacoml.covselect.symbolic import SymbolicStructureScreener
-from pharmacoml.covselect.selection_utils import build_interaction_terms, estimate_parameter_information
+from pharmacoml.covselect.selection_utils import association_matrix, build_interaction_terms, estimate_parameter_information
 from pharmacoml.covselect.traditional import TraditionalScreener
 
 
@@ -75,6 +75,8 @@ class HybridScreener:
         rescue_max_per_parameter: int = 2,
         rescue_alpha: float = 0.05,
         rescue_min_delta_aic: float = 1.0,
+        rescue_requires_parameter_anchor: bool = True,
+        rescue_redundancy_threshold: float = 0.65,
         small_sample_n: int = 100,
         small_sample_rescue_alpha: float = 0.15,
         small_sample_rescue_min_delta_aic: float = 0.25,
@@ -124,6 +126,8 @@ class HybridScreener:
         self.rescue_max_per_parameter = rescue_max_per_parameter
         self.rescue_alpha = rescue_alpha
         self.rescue_min_delta_aic = rescue_min_delta_aic
+        self.rescue_requires_parameter_anchor = rescue_requires_parameter_anchor
+        self.rescue_redundancy_threshold = rescue_redundancy_threshold
         self.small_sample_n = small_sample_n
         self.small_sample_rescue_alpha = small_sample_rescue_alpha
         self.small_sample_rescue_min_delta_aic = small_sample_rescue_min_delta_aic
@@ -275,6 +279,7 @@ class HybridScreener:
             ebes=ebe_input,
             covariates=cov_input,
         )
+        merged = self._prune_redundant_candidates(merged, cov_input)
         symbolic_summary = None
         if self.include_symbolic:
             symbolic = SymbolicStructureScreener(
@@ -1022,6 +1027,15 @@ class HybridScreener:
             if len(param_df) == 0:
                 continue
 
+            param_has_anchor = bool(
+                (
+                    param_df.get("scm_selected", False).astype(bool) |
+                    param_df.get("traditional_selected", False).astype(bool) |
+                    (param_df.get("support_count", 0).astype(int) >= 1) |
+                    param_df["tier"].isin(["core"])
+                ).any()
+            )
+
             base_table = param_df[param_df["scm_selected"] | param_df["tier"].isin(["core", "candidate"])].copy()
             rescue_candidates = param_df[
                 (param_df["tier"] == "rejected") &
@@ -1057,6 +1071,8 @@ class HybridScreener:
                     meta["base_selected"] and
                     not meta["low_support_multi_param"]
                 )
+                if self.rescue_requires_parameter_anchor and not param_has_anchor:
+                    selected = False
 
                 summary.loc[idx, "rescue_p_value"] = eval_result["p_value"]
                 summary.loc[idx, "rescue_robust_p_value"] = eval_result["robust_p_value"]
@@ -1077,6 +1093,7 @@ class HybridScreener:
                     accepted += 1
                     base_table = pd.concat([base_table, summary.loc[[idx]]], ignore_index=True)
                 elif (
+                    (not self.rescue_requires_parameter_anchor or param_has_anchor) and
                     is_small_sample and
                     is_binary and
                     prevalence <= self.low_prevalence_threshold and
@@ -1093,6 +1110,153 @@ class HybridScreener:
                     summary.loc[idx, "rescue_reason"] = ",".join(meta["reason_bits"] + ["top-parameter-ml-signal"]).strip(",")
 
         summary.loc[summary["scm_selected"], "confirmation_status"] = "scm"
+        summary["tier_rank"] = summary["tier"].map({"core": 0, "candidate": 1, "proxy": 2, "rejected": 3}).fillna(4).astype(int)
+        return summary
+
+    def _prune_redundant_candidates(
+        self,
+        summary: pd.DataFrame,
+        covariates: pd.DataFrame,
+    ) -> pd.DataFrame:
+        summary = summary.copy()
+        if len(summary) == 0 or self.rescue_redundancy_threshold <= 0:
+            return summary
+
+        for col, default in {
+            "support_count": 0,
+            "support_requirement": 2,
+            "scm_selected": False,
+            "traditional_selected": False,
+            "penalized_selected": False,
+            "score_rescue_candidate": False,
+            "combined_score_adjusted": 0.0,
+            "shapcov_score": 0.0,
+        }.items():
+            if col not in summary.columns:
+                summary[col] = default
+
+        assoc = association_matrix(covariates)
+        corr_filter = CorrelationFilter(threshold=self.corr_threshold)
+        corr_filter.fit(covariates)
+        strict_collinearity = any(len(members) >= 4 for members in corr_filter.groups.values() if len(members) > 1)
+
+        for param in summary["parameter"].unique():
+            param_mask = summary["parameter"] == param
+            param_df = summary.loc[param_mask].copy()
+            selected = param_df[param_df["tier"].isin(["core", "candidate"])].copy()
+            if len(selected) < 2:
+                if len(selected) == 1:
+                    selected["rescued_only"] = (
+                        selected.get("score_rescue_candidate", False).astype(bool) &
+                        (~selected.get("scm_selected", False).astype(bool)) &
+                        (~selected.get("traditional_selected", False).astype(bool)) &
+                        (selected.get("support_count", 0).astype(int) < selected.get("support_requirement", 2).astype(int))
+                    )
+                    param_has_anchor = bool(
+                        (
+                            selected.get("scm_selected", False).astype(bool) |
+                            selected.get("traditional_selected", False).astype(bool) |
+                            (selected.get("support_count", 0).astype(int) >= selected.get("support_requirement", 2).astype(int)) |
+                            (~selected["rescued_only"])
+                        ).any()
+                    )
+                    if not param_has_anchor and bool(selected["rescued_only"].iloc[0]):
+                        idx_mask = (summary["parameter"] == param) & (summary["covariate"] == selected["covariate"].iloc[0])
+                        summary.loc[idx_mask, "tier"] = "rejected"
+                continue
+
+            selected["rescued_only"] = (
+                selected.get("score_rescue_candidate", False).astype(bool) &
+                (~selected.get("scm_selected", False).astype(bool)) &
+                (~selected.get("traditional_selected", False).astype(bool)) &
+                (selected.get("support_count", 0).astype(int) < selected.get("support_requirement", 2).astype(int))
+            )
+            param_has_anchor = bool(
+                (
+                    selected.get("scm_selected", False).astype(bool) |
+                    selected.get("traditional_selected", False).astype(bool) |
+                    (selected.get("support_count", 0).astype(int) >= selected.get("support_requirement", 2).astype(int)) |
+                    (~selected["rescued_only"])
+                ).any()
+            )
+            if not param_has_anchor:
+                rescue_mask = (
+                    (summary["parameter"] == param) &
+                    summary["tier"].isin(["core", "candidate"]) &
+                    summary.get("score_rescue_candidate", False).astype(bool)
+                )
+                summary.loc[rescue_mask, "tier"] = "rejected"
+                continue
+
+            if strict_collinearity:
+                weak_mask = (
+                    (summary["parameter"] == param) &
+                    (summary["tier"] == "candidate") &
+                    (summary.get("support_count", 0).astype(int) <= 1) &
+                    (~summary.get("penalized_selected", False).astype(bool))
+                )
+                summary.loc[weak_mask, "tier"] = "rejected"
+                param_df = summary.loc[param_mask].copy()
+                selected = param_df[param_df["tier"].isin(["core", "candidate"])].copy()
+                if len(selected) < 2:
+                    continue
+                selected["rescued_only"] = (
+                    selected.get("score_rescue_candidate", False).astype(bool) &
+                    (~selected.get("scm_selected", False).astype(bool)) &
+                    (~selected.get("traditional_selected", False).astype(bool)) &
+                    (selected.get("support_count", 0).astype(int) < selected.get("support_requirement", 2).astype(int))
+                )
+
+            candidate_cols = [c for c in selected["covariate"].tolist() if c in assoc.index]
+            if not candidate_cols:
+                continue
+            centrality = assoc.loc[candidate_cols, candidate_cols].copy()
+            np.fill_diagonal(centrality.values, np.nan)
+            centrality = centrality.mean(axis=1, skipna=True).fillna(0.0).to_dict()
+            selected["group_centrality"] = selected["covariate"].map(lambda c: float(centrality.get(c, 0.0)))
+
+            ranked = selected.sort_values(
+                [
+                    "tier_rank",
+                    "support_count",
+                    "scm_selected",
+                    "traditional_selected",
+                    "penalized_selected",
+                    "group_centrality",
+                    "combined_score_adjusted",
+                    "shapcov_score",
+                ],
+                ascending=[True, False, False, False, False, False, False, False],
+            )
+
+            survivors: list[str] = []
+            for _, row in ranked.iterrows():
+                cov = row["covariate"]
+                if cov not in assoc.index:
+                    survivors.append(cov)
+                    continue
+                if row["tier"] == "core":
+                    survivors.append(cov)
+                    continue
+
+                demote_to = None
+                for survivor in survivors:
+                    if survivor not in assoc.index:
+                        continue
+                    if self._should_preserve_proxy_pair(covariates, survivor, cov):
+                        continue
+                    if float(assoc.loc[cov, survivor]) >= self.rescue_redundancy_threshold:
+                        demote_to = survivor
+                        break
+
+                if demote_to is None:
+                    survivors.append(cov)
+                    continue
+
+                idx_mask = (summary["parameter"] == param) & (summary["covariate"] == cov)
+                summary.loc[idx_mask, "tier"] = "proxy"
+                summary.loc[idx_mask, "proxy_for"] = demote_to
+
         summary["tier_rank"] = summary["tier"].map({"core": 0, "candidate": 1, "proxy": 2, "rejected": 3}).fillna(4).astype(int)
         return summary
 
@@ -1130,23 +1294,52 @@ class HybridScreener:
         summary["proxy_group_id"] = ""
         summary["proxy_for"] = ""
         summary["group_representative"] = False
+        for col, default in {
+            "support_count": 0,
+            "scm_selected": False,
+            "traditional_selected": False,
+            "penalized_selected": False,
+            "combined_score": 0.0,
+            "shapcov_importance": 0.0,
+            "penalized_importance": 0.0,
+        }.items():
+            if col not in summary.columns:
+                summary[col] = default
 
         corr_filter = CorrelationFilter(threshold=self.corr_threshold)
         corr_filter.fit(covariates)
+        assoc = association_matrix(covariates)
         groups = [members for members in corr_filter.groups.values() if len(members) > 1]
         if not groups:
             return summary
 
         for group_idx, members in enumerate(groups, start=1):
             group_id = f"G{group_idx}"
+            group_centrality = {}
+            present_members = [m for m in members if m in assoc.index]
+            if present_members:
+                sub = assoc.loc[present_members, present_members].copy()
+                np.fill_diagonal(sub.values, np.nan)
+                group_centrality = sub.mean(axis=1, skipna=True).fillna(0.0).to_dict()
             for param in summary["parameter"].unique():
                 mask = (summary["parameter"] == param) & (summary["covariate"].isin(members))
                 pdf = summary.loc[mask].copy()
                 if len(pdf) == 0:
                     continue
+                pdf["group_centrality"] = pdf["covariate"].map(lambda c: float(group_centrality.get(c, 0.0)))
                 ranked = pdf.sort_values(
-                    ["tier_rank", "combined_score", "shapcov_importance", "penalized_importance"],
-                    ascending=[True, False, False, False],
+                    [
+                        "tier_rank",
+                        "support_count",
+                        "scm_selected",
+                        "traditional_selected",
+                        "penalized_selected",
+                        "group_centrality",
+                        "combined_score",
+                        "shapcov_importance",
+                        "penalized_importance",
+                    ],
+                    ascending=[True, False, False, False, False, False, False, False, False],
                 )
                 representative = ranked.iloc[0]["covariate"]
                 summary.loc[mask, "proxy_group_id"] = group_id

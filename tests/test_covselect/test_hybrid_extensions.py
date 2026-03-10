@@ -206,6 +206,170 @@ def test_rescue_candidates_recovers_parameter_specific_secondary_effect():
     assert rescued.loc[("VC", "RARE"), "rescued_confirmed"]
 
 
+def test_rescue_candidates_require_parameter_anchor_for_rescue_only_signal():
+    rng = np.random.RandomState(17)
+    n = 80
+    wt = rng.normal(70, 10, n)
+    age = rng.normal(55, 8, n)
+    ebes = pd.DataFrame({
+        "CL": 5.0 * (wt / np.median(wt)) ** 0.75 * np.exp(rng.normal(0, 0.1, n)),
+        "KA": 1.0 + 0.25 * (wt - np.median(wt)) / np.std(wt) + rng.normal(0, 0.05, n),
+    })
+    covs = pd.DataFrame({"WT": wt, "AGE": age})
+    summary = pd.DataFrame(
+        [
+            {
+                "parameter": "CL",
+                "covariate": "WT",
+                "functional_form": "power",
+                "shapcov_selected": True,
+                "shapcov_importance": 0.45,
+                "stg_selected": False,
+                "traditional_selected": False,
+                "support_count": 1,
+                "combined_score": 0.45,
+                "tier": "candidate",
+                "tier_rank": 1,
+                "scm_selected": True,
+                "support_label": "scm",
+                "screening_suppressed": False,
+            },
+            {
+                "parameter": "KA",
+                "covariate": "WT",
+                "functional_form": "linear",
+                "shapcov_selected": True,
+                "shapcov_importance": 0.35,
+                "stg_selected": False,
+                "traditional_selected": False,
+                "support_count": 0,
+                "combined_score": 0.35,
+                "tier": "rejected",
+                "tier_rank": 3,
+                "scm_selected": False,
+                "support_label": "none",
+                "screening_suppressed": False,
+            },
+        ]
+    )
+
+    screener = HybridScreener(enable_rescue=True, rescue_score_floor=0.02)
+    rescued = screener._apply_rescue_candidates(summary, ebes=ebes, covariates=covs)
+    ka_row = rescued.set_index(["parameter", "covariate"]).loc[("KA", "WT")]
+
+    assert ka_row["tier"] == "rejected"
+    assert ka_row["confirmation_status"] == "unconfirmed"
+
+
+def test_prune_redundant_candidates_demotes_rescue_only_proxy():
+    covs = pd.DataFrame(
+        {
+            "WT": [60, 65, 70, 75, 80, 85],
+            "NOISE": [61, 66, 71, 76, 81, 86],
+            "AGE": [40, 45, 50, 55, 60, 65],
+        }
+    )
+    summary = pd.DataFrame(
+        [
+            {
+                "parameter": "CL",
+                "covariate": "WT",
+                "tier": "candidate",
+                "tier_rank": 1,
+                "support_count": 2,
+                "support_requirement": 2,
+                "scm_selected": True,
+                "traditional_selected": False,
+                "penalized_selected": True,
+                "score_rescue_candidate": True,
+                "combined_score_adjusted": 0.55,
+                "shapcov_score": 0.60,
+            },
+            {
+                "parameter": "CL",
+                "covariate": "NOISE",
+                "tier": "candidate",
+                "tier_rank": 1,
+                "support_count": 0,
+                "support_requirement": 2,
+                "scm_selected": False,
+                "traditional_selected": False,
+                "penalized_selected": False,
+                "score_rescue_candidate": True,
+                "combined_score_adjusted": 0.75,
+                "shapcov_score": 0.90,
+            },
+            {
+                "parameter": "CL",
+                "covariate": "AGE",
+                "tier": "rejected",
+                "tier_rank": 3,
+                "support_count": 0,
+                "support_requirement": 2,
+                "scm_selected": False,
+                "traditional_selected": False,
+                "penalized_selected": False,
+                "score_rescue_candidate": False,
+                "combined_score_adjusted": 0.10,
+                "shapcov_score": 0.10,
+            },
+        ]
+    )
+
+    screener = HybridScreener(rescue_redundancy_threshold=0.65)
+    pruned = screener._prune_redundant_candidates(summary, covariates=covs)
+    noise_row = pruned.set_index(["parameter", "covariate"]).loc[("CL", "NOISE")]
+
+    assert noise_row["tier"] == "proxy"
+    assert noise_row["proxy_for"] == "WT"
+
+
+def test_prune_redundant_candidates_drops_unanchored_rescue_only_parameter():
+    covs = pd.DataFrame(
+        {
+            "WT": [60, 65, 70, 75, 80, 85],
+            "AGE": [40, 45, 50, 55, 60, 65],
+        }
+    )
+    summary = pd.DataFrame(
+        [
+            {
+                "parameter": "KA",
+                "covariate": "WT",
+                "tier": "candidate",
+                "tier_rank": 1,
+                "support_count": 0,
+                "support_requirement": 2,
+                "scm_selected": False,
+                "traditional_selected": False,
+                "penalized_selected": False,
+                "score_rescue_candidate": True,
+                "combined_score_adjusted": 0.70,
+                "shapcov_score": 0.90,
+            },
+            {
+                "parameter": "KA",
+                "covariate": "AGE",
+                "tier": "candidate",
+                "tier_rank": 1,
+                "support_count": 0,
+                "support_requirement": 2,
+                "scm_selected": False,
+                "traditional_selected": False,
+                "penalized_selected": False,
+                "score_rescue_candidate": True,
+                "combined_score_adjusted": 0.65,
+                "shapcov_score": 0.85,
+            },
+        ]
+    )
+
+    screener = HybridScreener()
+    pruned = screener._prune_redundant_candidates(summary, covariates=covs)
+
+    assert set(pruned["tier"]) == {"rejected"}
+
+
 def test_stg_screener_smoke():
     torch = pytest.importorskip("torch")
     assert torch is not None

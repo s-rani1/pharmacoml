@@ -1,6 +1,6 @@
 {
   "suite": "release_hybrid_screener",
-  "captured_on": "2026-03-08",
+  "captured_on": "2026-03-10",
   "cases": [
     {
       "name": "pheno",
@@ -60,44 +60,44 @@
     {
       "variant": "baseline",
       "cases": 8,
-      "mean_precision": 0.668375,
-      "mean_recall": 0.85,
-      "mean_F1": 0.725125,
-      "mean_FDR": 0.331625,
-      "primary_score": 0.7024,
+      "mean_precision": 0.796875,
+      "mean_recall": 0.775,
+      "mean_F1": 0.729625,
+      "mean_FDR": 0.203125,
+      "primary_score": 0.7565,
       "rfe_enabled": false,
       "shrinkage_awareness": false
     },
     {
       "variant": "rfe",
       "cases": 8,
-      "mean_precision": 0.724625,
+      "mean_precision": 0.854125,
       "mean_recall": 0.875,
-      "mean_F1": 0.77075,
-      "mean_FDR": 0.27537500000000004,
-      "primary_score": 0.7523,
+      "mean_F1": 0.833375,
+      "mean_FDR": 0.145875,
+      "primary_score": 0.8417,
       "rfe_enabled": true,
       "shrinkage_awareness": false
     },
     {
       "variant": "shrinkage",
       "cases": 8,
-      "mean_precision": 0.75175,
-      "mean_recall": 0.85,
-      "mean_F1": 0.787625,
-      "mean_FDR": 0.24825,
-      "primary_score": 0.7733,
+      "mean_precision": 0.88025,
+      "mean_recall": 0.775,
+      "mean_F1": 0.792125,
+      "mean_FDR": 0.11975,
+      "primary_score": 0.8274,
       "rfe_enabled": false,
       "shrinkage_awareness": true
     },
     {
       "variant": "rfe+shrinkage",
       "cases": 8,
-      "mean_precision": 0.808,
+      "mean_precision": 0.9375,
       "mean_recall": 0.875,
-      "mean_F1": 0.83325,
-      "mean_FDR": 0.192,
-      "primary_score": 0.8232,
+      "mean_F1": 0.895875,
+      "mean_FDR": 0.0625,
+      "primary_score": 0.9125,
       "rfe_enabled": true,
       "shrinkage_awareness": true
     }
