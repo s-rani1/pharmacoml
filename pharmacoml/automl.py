@@ -1,7 +1,7 @@
 """
 pharmacoml.automl — Automated Population Model Building (v1.0 scaffold)
 
-This module will provide H2O/pyDarwin-style automated model search:
+This module will provide automated model-search workflows such as:
 - Generate candidate models (structural + covariate combinations)
 - Estimate each model using a pluggable backend (nlmixr2, Pharmpy, NONMEM)
 - Rank models by fitness (BIC, AIC, custom penalty)

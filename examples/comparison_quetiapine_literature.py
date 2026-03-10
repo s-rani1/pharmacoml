@@ -1,20 +1,10 @@
 """
-pharmacoml vs pyDarwin: Output Comparison on Quetiapine-like Pop PK Data
-========================================================================
+Quetiapine-like literature comparison example.
+==============================================
 
 This script simulates a quetiapine pop PK dataset matching published models,
-runs pharmacoml's covariate screening, and compares results against:
-
-1. pyDarwin (Li et al., J Pharmacokinet Pharmacodyn 2024):
-   - Final model: 3-compartment, linear elimination
-   - Covariates found: Weight on V (power function)
-   - Search: 1.5M candidate models, ~weeks of NONMEM runs
-
-2. Published quetiapine popPK (Fukushi et al., Clin Ther 2020):
-   - Covariates: GGT on CL/F, body weight on V/F
-
-3. Systematic review (Han et al., Expert Rev Clin Pharmacol 2024):
-   - Confirmed covariates: WT on V, Age on CL, CYP3A4 inducers on CL
+runs pharmacoml's covariate screening, and compares the results against
+published quetiapine literature.
 """
 
 import numpy as np
@@ -29,7 +19,7 @@ import sys
 def simulate_quetiapine_ebes(n=405, seed=42):
     """Simulate EBEs matching published quetiapine popPK parameters.
     
-    Based on CATIE trial demographics (n=405, pyDarwin paper) and
+    Based on CATIE-like trial demographics and
     published covariate relationships from systematic review.
     
     True model:
@@ -67,7 +57,7 @@ def simulate_quetiapine_ebes(n=405, seed=42):
 
 
 print("=" * 80)
-print("pharmacoml vs pyDarwin: Quetiapine Pop PK Covariate Comparison")
+print("pharmacoml: Quetiapine Pop PK Covariate Comparison")
 print("=" * 80)
 
 ebes, covs = simulate_quetiapine_ebes()
@@ -153,30 +143,29 @@ results.to_nonmem()
 # ─────────────────────────────────────────────────────────────
 
 print("\n" + "=" * 80)
-print("HEAD-TO-HEAD COMPARISON: pharmacoml vs pyDarwin vs Published Literature")
+print("COMPARISON: pharmacoml vs Published Literature")
 print("=" * 80)
 
 comparison = """
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                        COVARIATE IDENTIFICATION RESULTS                     │
 ├──────────────┬──────────┬───────────────────┬───────────────┬───────────────┤
-│   Covariate  │ Parameter│    pyDarwin       │  pharmacoml   │  Published    │
-│              │          │ (JPKPD 2024)      │  (this run)   │  Literature   │
-├──────────────┼──────────┼───────────────────┼───────────────┼───────────────┤
-│ WT           │    V     │ ✅ Power on V     │  {wt_v}       │ ✅ Power ~1.0 │
-│ AGE          │    CL    │ ❌ Not tested     │  {age_cl}     │ ✅ Power -0.3 │
-│ GGT          │    CL    │ ❌ Not tested     │  {ggt_cl}     │ ✅ Significant│
-│ CYP3A4_IND   │    CL    │ ❌ Not tested     │  {cyp_cl}     │ ✅ ~4x effect │
-│ SEX          │    CL    │ ✅ Sex on CL      │  {sex_cl}     │ ❓ Mixed      │
-│ SMOKING      │   any    │ ❌ Not included   │  {smoke}      │ ❌ Not signif │
-│ RACE_WHITE   │   any    │ ❌ Not included   │  {race}       │ ❌ Not signif │
-├──────────────┼──────────┼───────────────────┼───────────────┼───────────────┤
-│ RUNTIME      │          │ Hours-Days        │  {runtime}    │      N/A      │
-│              │          │ (needs NONMEM)    │  (no NONMEM)  │               │
-│ MODELS RUN   │          │ ~1.5M NONMEM runs │  0 NONMEM     │      N/A      │
-│ FUNC. FORM   │          │ Must pre-specify  │  Auto-detected│      N/A      │
-│ CONFIDENCE   │          │ None reported     │  Bootstrap CI │      N/A      │
-└──────────────┴──────────┴───────────────────┴───────────────┴───────────────┘
+│   Covariate  │ Parameter│  pharmacoml   │  Published    │
+│              │          │  (this run)   │  Literature   │
+├──────────────┼──────────┼───────────────┼───────────────┤
+│ WT           │    V     │  {wt_v}       │ ✅ Power ~1.0 │
+│ AGE          │    CL    │  {age_cl}     │ ✅ Power -0.3 │
+│ GGT          │    CL    │  {ggt_cl}     │ ✅ Significant│
+│ CYP3A4_IND   │    CL    │  {cyp_cl}     │ ✅ ~4x effect │
+│ SEX          │    CL    │  {sex_cl}     │ ❓ Mixed      │
+│ SMOKING      │   any    │  {smoke}      │ ❌ Not signif │
+│ RACE_WHITE   │   any    │  {race}       │ ❌ Not signif │
+├──────────────┼──────────┼───────────────┼───────────────┤
+│ RUNTIME      │          │  {runtime}    │      N/A      │
+│ MODELS RUN   │          │  0 NONMEM     │      N/A      │
+│ FUNC. FORM   │          │  Auto-detected│      N/A      │
+│ CONFIDENCE   │          │  Bootstrap CI │      N/A      │
+└──────────────┴──────────┴───────────────┴───────────────┘
 """
 
 # Fill in pharmacoml results
@@ -205,6 +194,6 @@ filled = comparison.format(
 )
 print(filled)
 
-print("\nNOTE: pyDarwin's quetiapine example searched structural models (1-3 cmt),")
-print("BSV, BOV, error models AND covariates simultaneously. pharmacoml only does")
-print("covariate screening — but does it in seconds, not days, and without NONMEM.")
+print("\nNOTE: pharmacoml screens covariates from EBEs/individual parameters,")
+print("with runtime measured in seconds and no dependence on NONMEM for")
+print("the screening workflow itself.")
