@@ -133,16 +133,16 @@ benchmarking workflow changes.
 
 Current agreement snapshot for the benchmark-backed default workflow:
 
-| Dataset | Agreement |
-|---|---|
-| `pheno` | Exact |
-| `eleveld_union` | Exact |
-| `ggpmx_theophylline` | Exact |
-| `high_shrinkage_user_input` | Exact |
-| `age_pma_distinct` | Exact |
-| `interaction_xor_screening` | Exact |
-| `asiimwe_correlated_small_n` | Partial |
-| `shapcov_collinear` | Partial |
+| Dataset | Agreement | Source / data |
+|---|---|---|
+| `pheno` | Exact | [Pharmpy example model/data](https://pharmpy.github.io/latest/modeling.html#loading-example-models) |
+| `eleveld_union` | Exact | [Wahlquist public propofol benchmark repo](https://github.com/wahlquisty/learning-pharmacometric-covariate-structures) |
+| `ggpmx_theophylline` | Exact | [ggPMX theophylline example files](https://github.com/ggPMXdevelopment/ggPMX/tree/master/inst/testdata/theophylline) |
+| `high_shrinkage_user_input` | Exact | [Generated in package](https://github.com/s-rani1/pharmacoml/blob/main/pharmacoml/covselect/public_benchmarks.py) |
+| `age_pma_distinct` | Exact | [Generated in package](https://github.com/s-rani1/pharmacoml/blob/main/pharmacoml/covselect/public_benchmarks.py) |
+| `interaction_xor_screening` | Exact | [Generated in package](https://github.com/s-rani1/pharmacoml/blob/main/pharmacoml/covselect/public_benchmarks.py) |
+| `asiimwe_correlated_small_n` | Partial | [Generated in package](https://github.com/s-rani1/pharmacoml/blob/main/pharmacoml/covselect/public_benchmarks.py) |
+| `shapcov_collinear` | Partial | [Generated in package](https://github.com/s-rani1/pharmacoml/blob/main/pharmacoml/covselect/public_benchmarks.py) |
 
 The current fixed benchmark suite shows exact agreement on the real/public PK
 cases and targeted shrinkage, proxy, and interaction checks, with remaining
